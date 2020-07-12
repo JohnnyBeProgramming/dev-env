@@ -11,14 +11,13 @@
 alias cls=clear
 alias zshconfig="edit ~/.zshrc"
 alias ohmyzsh="edit ~/.oh-my-zsh"
-alias getmyip="dig +short myip.opendns.com @resolver1.opendns.com"
-alias python='python3'
-# ---------------------------------------------------------------------------
-
-# ---------------------------------------------------------------------------
-# Environment variables
 # ---------------------------------------------------------------------------
 export EDITOR='vim -w'
+
+
+# ---------------------------------------------------------------------------
+# Additional helper methods
+# ---------------------------------------------------------------------------
 
 # Docker and docker-compose settings
 export COMPOSE_HTTP_TIMEOUT=180
@@ -32,8 +31,12 @@ export DOCKER_BUILDKIT=1
         -o "nospace" \
         -W "$(grep "^Host" ~/.ssh/config | \
         grep -v "[?*]" | cut -d " " -f2 | \
-        tr ' ' '\n')" scp sftp ssh
+        tr ' ' '\n')" scp sftp ssh;
+
 # ---------------------------------------------------------------------------
+# Set up auto completion for kubectl
+# ---------------------------------------------------------------------------
+if [ -f /usr/local/bin/kubectl ]; then source <(kubectl completion zsh); fi
 
 
 # ---------------------------------------------------------------------------
@@ -69,36 +72,3 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
-
-# Set up auto completion for kubectl
-if [ /usr/local/bin/kubectl ]; then source <(kubectl completion zsh); fi
-
-# ---------------------------------------------------------------------------
-# Additional helper methods
-# ---------------------------------------------------------------------------
-
-function docker-stats() {
-  docker stats $(docker ps -q)
-}
-
-function docker-dev-mail() {
-  echo "Check mail at: http://localhost:1080"
-  docker run --name=dev-mail -p 1080:80 -p 25:25 "djfarrelly/maildev"
-}
-
-function git-submodule-remove() {
-  local target_dir=${1}
-
-  [ "${target_dir}" == "" ] && echo "No target specified..." && exit 1;
-  [ ! -d "${target_dir}" ] && echo "Submodule folder does not exists." && exit 1;
-
-  echo "Moving '${target_dir}' to temp folder..."
-  mv ${target_dir} ${target_dir}_old
-  echo "De-initialising submodule..."
-  git submodule deinit ${target_dir} || exit 1
-  echo "Removing git folder '${target_dir}'..."
-  git rm ${target_dir} || echo " - No git folder to remove..."
-  git rm --cached ${target_dir} || echo " - Could not remove git cache for '${target_dir}'..."
-  echo "Restoring folder contents back to original folder '${target_dir}'."
-  mv ${target_dir}_old ${target_dir}
-}

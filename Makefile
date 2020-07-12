@@ -6,7 +6,7 @@
 .DEFAULT_GOAL := help
 SHELL := /bin/sh
 
-IMAGE_NAME ?= johnnybedockered/dev-end
+IMAGE_NAME ?= johnnybedockered/dev-env
 IMAGE_TAG ?= latest
 
 # ----------------------------------------------------------------------------------------------------------------------
