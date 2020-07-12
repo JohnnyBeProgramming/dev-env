@@ -30,4 +30,5 @@ dev: # Start in development mode
 		-e GIT_USER=`git config user.name` \
 		-e GIT_EMAIL=`git config user.email` \
 		-v ~/.ssh:/home/sandbox/.ssh \
+		-v /var/run/docker.sock:/var/run/docker.sock \
 		$(IMAGE_NAME):$(IMAGE_TAG)
