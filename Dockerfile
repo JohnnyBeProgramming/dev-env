@@ -13,10 +13,12 @@ RUN apk add -U --no-cache \
 RUN adduser -S sandbox -s /bin/zsh
 ENV HOME /home/sandbox
 WORKDIR $HOME
-COPY ./home $HOME
 
 # Install zshell extensions
 RUN curl -L https://github.com/robbyrussell/oh-my-zsh/raw/master/tools/install.sh | zsh || true    
+
+# Copy home folder contents
+COPY ./home $HOME
 
 # Set working folder for the user
 WORKDIR /workspace
