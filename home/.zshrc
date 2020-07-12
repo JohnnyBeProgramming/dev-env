@@ -12,40 +12,18 @@ alias cls=clear
 alias zshconfig="edit ~/.zshrc"
 alias ohmyzsh="edit ~/.oh-my-zsh"
 # ---------------------------------------------------------------------------
+
 export EDITOR='vim -w'
 
-
-# ---------------------------------------------------------------------------
-# Additional helper methods
-# ---------------------------------------------------------------------------
-
-# Docker and docker-compose settings
 export COMPOSE_HTTP_TIMEOUT=180
 export DOCKER_BUILDKIT=1
 
-# ---------------------------------------------------------------------------
-# Add tab completion for SSH hostnames based on ~/.ssh/config
-# ignoring wildcards
-# ---------------------------------------------------------------------------
-[[ -e "$HOME/.ssh/config" ]] && complete -o "default" \
-        -o "nospace" \
-        -W "$(grep "^Host" ~/.ssh/config | \
-        grep -v "[?*]" | cut -d " " -f2 | \
-        tr ' ' '\n')" scp sftp ssh;
 
 # ---------------------------------------------------------------------------
 # Set up auto completion for kubectl
 # ---------------------------------------------------------------------------
 if [ -f /usr/local/bin/kubectl ]; then source <(kubectl completion zsh); fi
 
-
-# ---------------------------------------------------------------------------
-# Go SDK
-# ---------------------------------------------------------------------------
-#export GOPATH=$HOME/Go
-#export GOROOT=/usr/local/opt/go/libexec
-#export PATH="$PATH:$GOPATH/bin"
-#export PATH="$PATH:$GOROOT/bin"
 
 # ---------------------------------------------------------------------------
 # Path to your oh-my-zsh installation.
@@ -56,8 +34,7 @@ export ZSH=$HOME/.oh-my-zsh
 # load a random theme each time oh-my-zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-ZSH_THEME="gozilla"
-#ZSH_THEME="agnoster"
+ZSH_THEME="agnoster"
 
 # Do NOT auto-switch (cd <folder>) when <folder> typed
 unsetopt AUTO_CD
