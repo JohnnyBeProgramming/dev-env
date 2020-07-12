@@ -1,0 +1,96 @@
+#!/bin/bash
+# -----------------------------------------------------------------------------
+set -euo pipefail # Stop running the script on first error...
+# -----------------------------------------------------------------------------
+# Required libraries (MacOS)
+# - brew install socat
+# - brew cask reinstall xquartz
+# See also: 
+# - https://stackoverflow.com/questions/37826094/xt-error-cant-open-display-if-using-default-display
+# - https://medium.com/@dimitris.kapanidis/running-gui-apps-in-docker-containers-3bd25efa862a
+
+run() {
+    trap finish EXIT # Runs when application exists
+    parser "$@" # Parse command line options
+    init # configure dev environment
+
+    # Check if a target action was specified
+    if [ ! -z "${1:-}" ]; then
+        action=$1; shift # past argument        
+        case $action in
+            eyes)       x11_run "fr3nd/xeyes";;
+            eclipse)    x11_run "batmat/docker-eclipse";;
+            tor)        x11_run "jess/tor-browser";;
+            *)          x11_run "${action}";; # <-- custom docker image
+        esac
+    else
+        # Start the terminal as the sandbox user...
+        echo "Warning: Please specify the application to run, or alternatively the docker path."
+        display_help
+        exit 1
+    fi    
+}
+
+x11_run() {
+    display_path=docker.for.mac.host.internal:0
+
+    # Run the docker and link local display
+    docker run --rm -it -e DISPLAY=$display_path $1
+}
+
+display_help() {
+    echo "Usage: $0 [options] <application | docker path>" >&2
+    echo ""
+    echo "Where options:"
+    echo "   -h, --help             Displays this help message"
+    echo ""
+    echo "Applications:"
+    echo "   path/to/image:latest   Example of a custom image path."
+    echo "   eclipse                Open the Eclipse IDE in a container."
+    echo "   eyes                   A sample eyes application."
+    echo "   tor                    The Onion Router in a docker."
+    echo ""
+}
+
+parser() {
+    POSITIONAL=()
+
+    while [[ $# -gt 0 ]]
+    do
+        case $1 in
+            -h|--help)
+                display_help
+                exit 0
+            ;;
+            --debug)
+                verbose=Y
+                shift # past argument
+            ;;
+            *) # unknown option
+                POSITIONAL+=("$1") # save it in an array for later
+                shift # past argument
+            ;;
+        esac
+    done
+    # restore positional parameters that could not be matched and parsed
+    set -- "${POSITIONAL[@]:-}" 
+}
+
+init() {
+    # brew install Caskroom/cask/xquartz
+    # open -a XQuartz # Open XQuartz
+
+    # Create a new connection for the current display
+    socat TCP-LISTEN:6000,reuseaddr,fork UNIX-CLIENT:\"$DISPLAY\" &
+}
+
+clean() {
+    # Remove any old socat listeners on port 6000
+    lsof -i TCP:6000 | grep $1 | tr -s ' ' | cut -d ' ' -f 2 | xargs kill -9
+}
+
+finish() {
+    clean "socat"
+}
+
+run "$@"
